@@ -1,0 +1,75 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+
+entity Calculator_4bit is
+    Port ( A : in  STD_LOGIC_VECTOR (7 downto 0);
+           B : in  STD_LOGIC_VECTOR (7 downto 0);
+           
+			  rst:in std_logic;
+           SIGN_A : in  STD_LOGIC;
+           SIGN_B : in  STD_LOGIC;
+           OPERATION : in  STD_LOGIC_VECTOR (1 downto 0);
+			  Y : out  STD_LOGIC_VECTOR (15 downto 0));
+end Calculator_4bit;
+----------------------------------------------------------------------------------
+
+
+architecture Behavioral of Calculator_4bit is
+
+signal a_temp,b_temp,s1,s2,sum,diff:std_logic_vector(7 downto 0);
+signal mul,sum_temp,diff_temp:std_logic_vector(15 downto 0);
+signal Cout:std_logic;
+
+component MUX_2_1_8bit
+port(A:IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+     B:IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+	  S0:IN STD_LOGIC;
+	  Y:OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
+end component;
+component Adder_8bit 
+    Port ( A : in  STD_LOGIC_VECTOR (7 downto 0);
+           B : in  STD_LOGIC_VECTOR (7 downto 0);
+			  Cin : in  STD_LOGIC;
+           S : out  STD_LOGIC_VECTOR (7 downto 0);
+           Cout : out  STD_LOGIC);
+end component; 
+
+component subtractor_8bit
+    Port ( a : in  STD_LOGIC_VECTOR (7 downto 0);
+           b : in  STD_LOGIC_VECTOR (7 downto 0);
+           y : out  STD_LOGIC_VECTOR (7 downto 0));
+end component;
+component multiplier_8bit
+    Port ( a : in  STD_LOGIC_VECTOR (7 downto 0);
+           b : in  STD_LOGIC_VECTOR (7 downto 0);
+           y : out  STD_LOGIC_VECTOR (15 downto 0));
+end component;
+component MUX_8bit_4_1
+    Port ( I0,I1,I2,I3 : in  STD_LOGIC_VECTOR (15 downto 0);
+           S : in  STD_LOGIC_VECTOR (1 downto 0);
+           Y : out  STD_LOGIC_VECTOR (15 downto 0));
+end component;
+----------------------------------------------------------------------------------
+begin
+process(rst)
+BEGIN
+if rst='1' then
+    a_temp<="00000000";
+	 b_temp<="00000000";
+elsif rst='0' then
+	a_temp<= not A + "00000001";
+   b_temp<= not B + "00000001";   
+end if;
+end process; 
+X1: MUX_2_1_8bit port map(A,a_temp,sign_a,s1); 
+X2: MUX_2_1_8bit port map(B,b_temp,sign_b,s2);
+x3: Adder_8bit port map(s1,s2,'0',sum,Cout);
+x4: subtractor_8bit port map(s1,s2,diff);
+x5: multiplier_8bit port map(s1,s2,mul);
+sum_temp<="00000000" & sum;
+diff_temp<="00000000" & diff;
+x6: MUX_8bit_4_1 port map(sum_temp,diff_temp,mul,"0000000000000000",OPERATION,Y);
+end Behavioral;
+
