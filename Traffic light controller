@@ -1,0 +1,81 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_unsigned.ALL;
+
+
+entity Traffic_light_controller is
+    Port ( clk : in  STD_LOGIC;
+           rst : in  STD_LOGIC;
+           R_Y_G_EAST : out  STD_LOGIC_VECTOR (2 downto 0);
+           R_Y_G_WEST : out  STD_LOGIC_VECTOR (2 downto 0);
+           R_Y_G_NORTH : out  STD_LOGIC_VECTOR (2 downto 0);
+           R_Y_G_SOUTH : out  STD_LOGIC_VECTOR (2 downto 0));
+end Traffic_light_controller;
+
+architecture Behavioral of Traffic_light_controller is
+signal counter_east:std_logic_vector(5 downto 0):="101000";
+signal counter_north:std_logic_vector(6 downto 0):="1010000";
+signal counter_west:std_logic_vector(7 downto 0):="01111000";
+signal counter_south:std_logic_vector(7 downto 0):="10100000";
+begin
+process(clk,rst)
+begin
+if rst='1' then
+	counter_east<="101000";
+	counter_north<="1010000";
+	counter_west<="01111000";
+	counter_south<="10100000";
+	R_Y_G_EAST<="100";
+	R_Y_G_WEST<="100";
+	R_Y_G_NORTH<="100";
+	R_Y_G_SOUTH<="100";
+elsif rising_edge(clk) and rst='0' then
+	counter_east<=counter_east-1;
+	counter_west<=counter_west-1;
+	counter_north<=counter_north-1;
+	counter_south<=counter_south-1;
+	
+	
+	
+	
+	
+	if counter_east="101000" then
+		R_Y_G_EAST<="001";
+	elsif counter_east="000101" then
+		R_Y_G_EAST<="010";
+	elsif counter_east="000000" then
+		R_Y_G_EAST<="100";
+		counter_east<="000000";
+	   if counter_north="0101000" then
+			R_Y_G_NORTH<="001";
+		elsif counter_north="0000101" then
+			R_Y_G_NORTH<="010";
+		elsif counter_north="0000000" then
+			R_Y_G_NORTH<="100";
+			counter_north<="0000000";
+			if counter_west="00101000" then
+				R_Y_G_WEST<="001";
+			elsif counter_west="00000101" then
+				R_Y_G_WEST<="010";
+			elsif counter_west="00000000" then
+				R_Y_G_WEST<="100";
+				counter_west<="00000000";
+				if counter_south="00101000" then
+					R_Y_G_SOUTH<="001";
+				elsif counter_south="00000101" then
+					R_Y_G_SOUTH<="010";
+				elsif counter_south="00000000" then
+					R_Y_G_SOUTH<="100";
+					counter_east<="101000";
+					counter_north<="1010000";
+					counter_west<="01111000";
+					counter_south<="10100000";
+				end if;
+			end if;
+		end if;
+	end if;
+end if;
+end process;
+
+end Behavioral;
+
